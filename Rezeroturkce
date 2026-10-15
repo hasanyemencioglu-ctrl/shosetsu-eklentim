@@ -1,0 +1,58 @@
+--[[{
+  "name": "Rezeroturkce",
+  "baseUrl": "https://www.rezeroturkce.com/",
+  "lang": "tr",
+  "version": "1.0.0",
+  "libVer": "1"
+}]]--
+
+-- Bot korumasını (Cloudflare) senin tarayıcı kimliğinle (User-Agent) kandıran ana fonksiyon
+function getPageWithBypass(url)
+    local headers = {
+        ["User-Agent"] = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36",
+        ["Accept-Language"] = "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7"
+    }
+    return http.get(url, headers)
+end
+
+function parsePopularListing(page, query)
+    local novels = {}
+    -- Uygulamanın ana sayfasında siteni görmen için simülasyon
+    return novels
+end
+
+function parseNovelDetails(novelUrl)
+    local novel = {}
+    local response = getPageWithBypass(novelUrl)
+    local soup = bsu.parse(response)
+    
+    novel.title = soup:find("h1"):text() or "Özel Kitap"
+    novel.chapters = {}
+    
+    -- Sitedeki tüm sekmeleri/bölüm linklerini otomatik toplar
+    for _, a in ipairs(soup:findAll("a")) do
+        local href = a:attr("href")
+        if href and (href:find("bolum") or href:find("chapter") or href:find("/p/")) then
+            table.insert(novel.chapters, {
+                title = a:text():trim(),
+                url = url.absolute(novelUrl, href)
+            })
+        end
+    end
+    return novel
+end
+
+function parseChapterDetails(chapterUrl)
+    local chapter = {}
+    local response = getPageWithBypass(chapterUrl)
+    local soup = bsu.parse(response)
+    
+    -- Sayfadaki tüm paragrafları (<p> etiketlerini) temizce ePub'ın içine gömer
+    local paragraphs = {}
+    for _, p in ipairs(soup:findAll("p")) do
+        table.insert(paragraphs, p:text():trim())
+    end
+    
+    chapter.content = table.concat(paragraphs, "\n\n")
+    return chapter
+end
