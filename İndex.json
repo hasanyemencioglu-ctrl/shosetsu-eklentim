@@ -1,0 +1,14 @@
+{
+  "libraries": [],
+  "scripts": [
+    {
+      "name": "Rezeroturkce",
+      "version": "1.0.0",
+      "description": "Bot koruması kıran eklenti",
+      "author": "Kanka",
+      "lang": "tr",
+      "path": "sitem.lua"
+    }
+  ],
+  "styles": []
+}
